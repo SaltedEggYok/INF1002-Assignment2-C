@@ -16,8 +16,6 @@
 /* word delimiters */
 const char *delimiters = " ?\t\n";
 
-#define _CRT_SECURE_NO_WARNINGS
-
 /*
  * Main loop.
  */
