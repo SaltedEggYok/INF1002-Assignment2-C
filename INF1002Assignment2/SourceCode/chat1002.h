@@ -54,4 +54,13 @@ void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 
+typedef struct knowledgeNode {
+	char key[MAX_INTENT];
+	char value[MAX_INTENT];
+	struct knowledgeNode* next;
+};
+
+struct knowledgeNode* whatStorage;
+struct knowledgeNode* whoStorage;
+struct knowledgeNode* whereStorage;
 #endif

@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
  * Utility function for comparing string case-insensitively.
  *
  * Input:
- *   token1 - the first token
- *   token2 - the second token
+ *   token1 - the first token 
+ *   token2 - the second token 
  *
  * Returns:
  *   as strcmp()

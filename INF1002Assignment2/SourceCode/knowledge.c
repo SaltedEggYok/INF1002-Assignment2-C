@@ -34,7 +34,7 @@
 int knowledge_get(const char *intent, const char *entity, char *response, int n) {
 
 	/* to be implemented */
-
+	
 	return KB_NOTFOUND;
 
 }
@@ -56,7 +56,7 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   KB_INVALID, if the intent is not a valid question word
  */
 int knowledge_put(const char *intent, const char *entity, const char *response) {
-
+	
 	/* to be implemented */
 
 	return KB_INVALID;
