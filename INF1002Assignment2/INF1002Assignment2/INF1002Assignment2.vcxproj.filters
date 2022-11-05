@@ -24,6 +24,9 @@
     <ClCompile Include="..\SourceCode\main.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\SourceCode\knowledgeNode.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SourceCode\chat1002.h">

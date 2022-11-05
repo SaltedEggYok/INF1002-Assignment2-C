@@ -54,13 +54,21 @@ void knowledge_reset();
 int knowledge_read(FILE *f);
 void knowledge_write(FILE *f);
 
+//simple linked list definitions
 typedef struct knowledgeNode {
-	char key[MAX_INTENT];
-	char value[MAX_INTENT];
+	char entity[MAX_ENTITY];
+	char response[MAX_RESPONSE];
 	struct knowledgeNode* next;
-};
 
-struct knowledgeNode* whatStorage;
-struct knowledgeNode* whoStorage;
-struct knowledgeNode* whereStorage;
+}knowledgeNode;
+
+//basic functions for knowledgeNOode
+knowledgeNode* nodeConstructor(char* intent, char* entity, char* response);
+knowledgeNode* getLastNode(knowledgeNode* head);
+knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity);
+void printList(knowledgeNode* head);
+
+//defining the head of the linked lists, and the iterator that will iterate through the lists
+knowledgeNode* whatHead, *whoHead, *whereHead, *listIter; 
+
 #endif

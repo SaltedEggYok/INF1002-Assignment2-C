@@ -17,24 +17,24 @@
 #include <string.h>
 #include "chat1002.h"
 
-/*
- * Get the response to a question.
- *
- * Input:
- *   intent   - the question word
- *   entity   - the entity
- *   response - a buffer to receive the response
- *   n        - the maximum number of characters to write to the response buffer
- *
- * Returns:
- *   KB_OK, if a response was found for the intent and entity (the response is copied to the response buffer)
- *   KB_NOTFOUND, if no response could be found
- *   KB_INVALID, if 'intent' is not a recognised question word
- */
-int knowledge_get(const char *intent, const char *entity, char *response, int n) {
+ /*
+  * Get the response to a question.
+  *
+  * Input:
+  *   intent   - the question word
+  *   entity   - the entity
+  *   response - a buffer to receive the response
+  *   n        - the maximum number of characters to write to the response buffer
+  *
+  * Returns:
+  *   KB_OK, if a response was found for the intent and entity (the response is copied to the response buffer)
+  *   KB_NOTFOUND, if no response could be found
+  *   KB_INVALID, if 'intent' is not a recognised question word
+  */
+int knowledge_get(const char* intent, const char* entity, char* response, int n) {
 
 	/* to be implemented */
-	
+
 	return KB_NOTFOUND;
 
 }
@@ -51,15 +51,23 @@ int knowledge_get(const char *intent, const char *entity, char *response, int n)
  *   response  - the response for this question and entity
  *
  * Returns:
- *   KB_FOUND, if successful
+ *   KB_OK, if successful
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
-int knowledge_put(const char *intent, const char *entity, const char *response) {
-	
-	/* to be implemented */
+int knowledge_put(const char* intent, const char* entity, const char* response) {
 
-	return KB_INVALID;
+	/* to be implemented */
+	//MIGHT BRING THE WHOLE NODECONSTRUCTOR CODE HERE
+	if (nodeConstructor(intent, entity, response))
+	{
+		return KB_OK;
+	}
+	else
+	{
+		return KB_INVALID;
+	}
+
 
 }
 
@@ -72,11 +80,88 @@ int knowledge_put(const char *intent, const char *entity, const char *response) 
  *
  * Returns: the number of entity/response pairs successful read from the file
  */
-int knowledge_read(FILE *f) {
+int knowledge_read(FILE* f) {
 
-	/* to be implemented */
+	//error handling
+	if (NULL == f)
+	{
+		printf("File was NULL (knowledge.c)\n");
+		return -1;
+	}
 
-	return 0;
+	int pairCount = 0;
+	//token - used for strtok, string - used for each line in .ini file
+	char* token, * buffer = malloc(MAX_INPUT * sizeof(char));
+	char intent[MAX_INTENT], entity[MAX_ENTITY], response[MAX_RESPONSE];
+	const char* delimiter = "=";
+	const char delim = '=';
+
+	//init intent, entity, response;
+	strcpy(intent, "");
+	strcpy(entity, "");
+	strcpy(response, "");
+
+	//file reading loop
+	while (1)
+	{
+		//endOfFile to be used at the bottom of the while loop to break out if needed
+		char* endOfFile = fgets(buffer, MAX_INPUT, f);
+
+		//if the line contains '=', it is an entity-response pair, call knowledge_put();
+		if (NULL != strchr(buffer, delim))
+		{
+			//if intent was not assigned anything, continue, if enters here means file was wrongly formatted
+			if ("" == intent)
+			{
+				continue;
+			}
+
+			//1st pass - entity, left of '='
+			token = strtok(buffer, delimiter);
+			strcpy(entity, token);
+
+			//2nd pass - responsed, right of '='
+			token = strtok(NULL, delimiter);
+			strcpy(response, token);
+
+			//adding to knowledge base
+			knowledge_put(intent, entity, response);
+			++pairCount;
+		}
+		else //if it does not contain '=', it is an intent line, set intent
+		{
+
+			if (strstr(buffer, "what")) //check if line is [WHAT], strcasestr returns a ptr, null if not found
+			{
+				strcpy(intent, "what");
+			}
+			else if (strstr(buffer, "who")) //check if line is [WHO]
+			{
+				strcpy(intent, "who");
+
+			}
+			else if (strstr(buffer, "where")) //check if line is [WHERE]
+			{
+				strcpy(intent, "where");
+			}
+			//blank line / irrelevant line
+			//do nothing
+		}
+
+		if (NULL == endOfFile)
+		{
+			break;
+		}
+	}
+
+	// clear memory
+	if (buffer)
+	{
+		free(buffer);
+		buffer = NULL; //for some reason nullptr doesn't work here
+
+	}
+	return pairCount;
 }
 
 
@@ -87,6 +172,39 @@ void knowledge_reset() {
 
 	/* to be implemented */
 
+	if (whatHead)
+	{
+		listIter = whatHead;
+		while (whatHead)
+		{
+			whatHead = whatHead->next;
+			free(listIter);
+			listIter = whatHead;
+		}
+	}
+
+	if (whoHead)
+	{
+		listIter = whoHead;
+		while (whoHead)
+		{
+			whoHead = whoHead->next;
+			free(listIter);
+			listIter = whoHead;
+		}
+	}
+
+	if (whereHead)
+	{
+		listIter = whereHead;
+		while (whereHead)
+		{
+			whereHead = whereHead->next;
+			free(listIter);
+			listIter = whereHead;
+		}
+	}
+
 }
 
 
@@ -96,8 +214,9 @@ void knowledge_reset() {
  * Input:
  *   f - the file
  */
-void knowledge_write(FILE *f) {
+void knowledge_write(FILE* f) {
 
 	/* to be implemented */
 
 }
+

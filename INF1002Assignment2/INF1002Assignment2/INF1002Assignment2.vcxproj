@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\SourceCode\chatbot.c" />
     <ClCompile Include="..\SourceCode\knowledge.c" />
+    <ClCompile Include="..\SourceCode\knowledgeNode.c" />
     <ClCompile Include="..\SourceCode\main.c" />
   </ItemGroup>
   <ItemGroup>
