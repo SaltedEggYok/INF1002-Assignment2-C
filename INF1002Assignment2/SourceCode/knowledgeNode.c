@@ -26,6 +26,9 @@ knowledgeNode* nodeConstructor(char* intent, char* entity, char* response)
 
 	//constructing newNode
 	knowledgeNode* newNode = malloc(sizeof(knowledgeNode));
+	if (NULL == newNode) {// if NULL means mem alloc error
+		return NULL
+	}
 	strcpy(newNode->entity, entity);
 	strcpy(newNode->response, response);
 	newNode->next = NULL;
@@ -57,7 +60,7 @@ knowledgeNode* nodeConstructor(char* intent, char* entity, char* response)
 
 knowledgeNode* getLastNode(knowledgeNode* head)
 {
-	if (NULL == head)
+	if (NULL == head) 
 	{
 		//printf("Node passed in was null (knowledgeNode.c - getLastNode)\n");
 		return NULL; // unlikely case
@@ -84,12 +87,13 @@ knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity)
 	knowledgeNode* iter = head;
 	//iterate through the list, checking if entity exists 
 	//SHOULD USE COMPARE TOKEN + THIS MAYBE SHOULD BE COMBINED WITH getLastNode?
-	while (iter->entity != entity)
+	while (compare_token( iter->entity ,entity) != 0)
 	{
-		//if next is null break out of the list
+		//if next is null return out of the function, as currentNode test has already failed
 		if (NULL == iter->next)
-			break;
-
+		{
+			return NULL;
+		}
 		//list iterating
 		iter = iter->next;
 	}

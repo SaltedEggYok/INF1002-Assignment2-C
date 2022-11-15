@@ -57,15 +57,20 @@ int knowledge_get(const char* intent, const char* entity, char* response, int n)
  */
 int knowledge_put(const char* intent, const char* entity, const char* response) {
 
-	/* to be implemented */
-	//MIGHT BRING THE WHOLE NODECONSTRUCTOR CODE HERE
-	if (nodeConstructor(intent, entity, response))
-	{
+	//if intent is not what, where and who
+	if (!(compare_token(intent, "what") != 0 &&
+		compare_token(intent, "where") != 0 &&
+		compare_token(intent, "who") != 0))	{
+		//should not really enter here 
+		return KB_INVALID;
+	}
+
+	//constructing newNode, if returns NULL means mem alloc problem
+	if (nodeConstructor(intent, entity, response))	{
 		return KB_OK;
 	}
-	else
-	{
-		return KB_INVALID;
+	else{
+		return KB_NOMEM;
 	}
 
 
@@ -170,8 +175,6 @@ int knowledge_read(FILE* f) {
  */
 void knowledge_reset() {
 
-	/* to be implemented */
-
 	if (whatHead)
 	{
 		listIter = whatHead;
@@ -217,6 +220,49 @@ void knowledge_reset() {
 void knowledge_write(FILE* f) {
 
 	/* to be implemented */
+	//Setting each linked-list
+	knowledgeNode* whoPtr = whoHead,
+		* wherePtr = whereHead,
+		* whatPtr = whatHead,
+		* temp = listIter;
 
+	//WHO
+	fprintf(f, "[who]\n");
+
+	while (whoPtr != NULL)
+	{
+		if (whoPtr->response[0] != '\0') {
+			fprintf(f, "%s=%s\n", whoPtr->entity, whoPtr->response); //writing each data onto the file
+		}
+		whoPtr = whoPtr->next; //point to the next after each node
+	}
+
+	fprintf(f, "\n");
+
+	//WHERE
+	fprintf(f, "[where]\n");
+
+	while (wherePtr != NULL)
+	{
+		if (wherePtr->response[0] != '\0') {
+			fprintf(f, "%s=%s\n", wherePtr->entity, wherePtr->response); //writing each data onto the file
+		}
+		wherePtr = wherePtr->next; //point to the next after each node
+	}
+
+	fprintf(f, "\n");
+
+	//WHAT
+	fprintf(f, "[what]\n");
+
+	while (whatPtr != NULL)
+	{
+		if (whatPtr->response[0] != '\0') {
+			fprintf(f, "%s=%s\n", whatPtr->entity, whatPtr->response); //writing each data onto the file
+		}
+		whatPtr = whatPtr->next; //point to the next after each node
+	}
+
+	fprintf(f, "\n");
 }
 
