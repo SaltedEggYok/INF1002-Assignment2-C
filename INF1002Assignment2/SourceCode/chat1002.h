@@ -64,8 +64,8 @@ typedef struct knowledgeNode {
 
 }knowledgeNode;
 
-//basic functions for knowledgeNOode
-knowledgeNode* nodeConstructor(char* intent, char* entity, char* response);
+//basic functions for knowledgeNode
+int nodeConstructor(char* intent, char* entity, char* response);
 knowledgeNode* getLastNode(knowledgeNode* head);
 knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity);
 void printList(knowledgeNode* head);

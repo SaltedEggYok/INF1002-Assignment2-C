@@ -63,16 +63,16 @@ int main(int argc, char *argv[]) {
 		} while (inc < 1);
 
 		knowledge_read(fopen("../Database/INF1002_Group Project Assignment_Sample.ini", "r"));
+		printList(whatHead);
+		printList(whoHead);
+		printList(whereHead);
 
+		
 		/* invoke the chatbot */
 		done = chatbot_main(inc, inv, output, MAX_RESPONSE);
 		printf("%s: %s\n", chatbot_botname(), output);
 
 		//debug lines, probably delete
-		//printList(whatHead);
-		//printList(whoHead);
-		//printList(whereHead);
-
 	} while (!done);
 
 	knowledge_reset(); //clean up function

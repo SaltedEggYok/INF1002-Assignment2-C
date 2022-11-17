@@ -57,22 +57,18 @@ int knowledge_get(const char* intent, const char* entity, char* response, int n)
  */
 int knowledge_put(const char* intent, const char* entity, const char* response) {
 
-	//if intent is not what, where and who
-	if (!(compare_token(intent, "what") != 0 &&
-		compare_token(intent, "where") != 0 &&
-		compare_token(intent, "who") != 0))	{
+	//if intent is what, where and who
+	if (compare_token(intent, "what") == 0 ||
+		compare_token(intent, "where") == 0 ||
+		compare_token(intent, "who") == 0) {
+
+		//constructing newNode, if can return KB_OK, KB_INVALID or KB_NOMEM
+		return nodeConstructor(intent, entity, response);
+	}
+	else {
 		//should not really enter here 
 		return KB_INVALID;
 	}
-
-	//constructing newNode, if returns NULL means mem alloc problem
-	if (nodeConstructor(intent, entity, response))	{
-		return KB_OK;
-	}
-	else{
-		return KB_NOMEM;
-	}
-
 
 }
 
@@ -130,7 +126,11 @@ int knowledge_read(FILE* f) {
 			strcpy(response, token);
 
 			//adding to knowledge base
-			knowledge_put(intent, entity, response);
+			int result;
+			result = knowledge_put(intent, entity, response);
+			if (result == KB_NOMEM) {
+				return result;
+			}
 			++pairCount;
 		}
 		else //if it does not contain '=', it is an intent line, set intent
@@ -221,20 +221,21 @@ void knowledge_write(FILE* f) {
 
 	/* to be implemented */
 	//Setting each linked-list
-	knowledgeNode* whoPtr = whoHead,
-		* wherePtr = whereHead,
-		* whatPtr = whatHead,
-		* temp = listIter;
+	//knowledgeNode* whoPtr = whoHead,
+	//	* wherePtr = whereHead,
+	//	* whatPtr = whatHead;
+	//	//* temp = listIter;
 
 	//WHO
 	fprintf(f, "[who]\n");
 
-	while (whoPtr != NULL)
+	listIter = whoHead;
+	while (listIter != NULL)
 	{
-		if (whoPtr->response[0] != '\0') {
-			fprintf(f, "%s=%s\n", whoPtr->entity, whoPtr->response); //writing each data onto the file
+		if (listIter->response[0] != '\0') {
+			fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
 		}
-		whoPtr = whoPtr->next; //point to the next after each node
+		listIter = listIter->next; //point to the next after each node
 	}
 
 	fprintf(f, "\n");
@@ -242,12 +243,13 @@ void knowledge_write(FILE* f) {
 	//WHERE
 	fprintf(f, "[where]\n");
 
-	while (wherePtr != NULL)
+	listIter = whereHead;
+	while (listIter != NULL)
 	{
-		if (wherePtr->response[0] != '\0') {
-			fprintf(f, "%s=%s\n", wherePtr->entity, wherePtr->response); //writing each data onto the file
+		if (listIter->response[0] != '\0') {
+			fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
 		}
-		wherePtr = wherePtr->next; //point to the next after each node
+		listIter = listIter->next; //point to the next after each node
 	}
 
 	fprintf(f, "\n");
@@ -255,12 +257,13 @@ void knowledge_write(FILE* f) {
 	//WHAT
 	fprintf(f, "[what]\n");
 
-	while (whatPtr != NULL)
+	listIter = whatHead;
+	while (listIter != NULL)
 	{
-		if (whatPtr->response[0] != '\0') {
-			fprintf(f, "%s=%s\n", whatPtr->entity, whatPtr->response); //writing each data onto the file
+		if (listIter->response[0] != '\0') {
+			fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
 		}
-		whatPtr = whatPtr->next; //point to the next after each node
+		listIter = listIter->next; //point to the next after each node
 	}
 
 	fprintf(f, "\n");

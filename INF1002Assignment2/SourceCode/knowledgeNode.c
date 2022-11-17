@@ -3,8 +3,8 @@
 #include <string.h>
 #include "chat1002.h"
 
-knowledgeNode* nodeConstructor(char* intent, char* entity, char* response)
-{	
+int nodeConstructor(char* intent, char* entity, char* response)
+{
 	//checking intent, to see which list the node should be added to, using strstr as the intent is already being controlled
 	if (strstr(intent, "who"))
 	{
@@ -21,13 +21,18 @@ knowledgeNode* nodeConstructor(char* intent, char* entity, char* response)
 	else
 	{
 		printf("intent not properly specified, unable to construct node, should never enter here, as intent should have been controlled earlier (knowledgeNode.c)\n");
-		return NULL;
+		return KB_INVALID;
+	}
+
+	//if entity exists, invalid input
+	if (doesEntityExist(listIter, entity)) {
+		return KB_INVALID;
 	}
 
 	//constructing newNode
 	knowledgeNode* newNode = malloc(sizeof(knowledgeNode));
 	if (NULL == newNode) {// if NULL means mem alloc error
-		return NULL
+		return KB_NOMEM;
 	}
 	strcpy(newNode->entity, entity);
 	strcpy(newNode->response, response);
@@ -35,32 +40,27 @@ knowledgeNode* nodeConstructor(char* intent, char* entity, char* response)
 
 	//adding node to the back of its respective list
 	listIter = getLastNode(listIter);
-	if (NULL == listIter) //if list was found to be empty, make the currently constructed node the head
-	{
-		if (strstr(intent, "who"))
-		{
+	if (NULL == listIter) {//if list was found to be empty, make the currently constructed node the head
+		if (strstr(intent, "who")) {
 			whoHead = newNode;
 		}
-		else if (strstr(intent, "what"))
-		{
+		else if (strstr(intent, "what")) {
 			whatHead = newNode;
 		}
-		else if (strstr(intent, "where"))
-		{
-			whereHead= newNode;
+		else if (strstr(intent, "where")) {
+			whereHead = newNode;
 		}
 	}
-	else //else add it to the tail
-	{
+	else { //else add it to the tail
 		listIter->next = newNode;
 	}
 
-	return newNode;
+	return KB_OK;
 }
 
 knowledgeNode* getLastNode(knowledgeNode* head)
 {
-	if (NULL == head) 
+	if (NULL == head)
 	{
 		//printf("Node passed in was null (knowledgeNode.c - getLastNode)\n");
 		return NULL; // unlikely case
@@ -77,7 +77,7 @@ knowledgeNode* getLastNode(knowledgeNode* head)
 
 knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity)
 {
-	
+
 	if (NULL == head)
 	{
 		//printf("Node passed in was null (knowledgeNode.c - doesEntityExist)\n");
@@ -87,7 +87,7 @@ knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity)
 	knowledgeNode* iter = head;
 	//iterate through the list, checking if entity exists 
 	//SHOULD USE COMPARE TOKEN + THIS MAYBE SHOULD BE COMBINED WITH getLastNode?
-	while (compare_token( iter->entity ,entity) != 0)
+	while (compare_token(iter->entity, entity) != 0)
 	{
 		//if next is null return out of the function, as currentNode test has already failed
 		if (NULL == iter->next)
@@ -99,7 +99,7 @@ knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity)
 	}
 	return iter;
 
-	
+
 	//return nullptr;
 }
 
@@ -120,6 +120,6 @@ void printList(knowledgeNode* head)
 			break;
 		}
 		iter = iter->next;
-	} 
+	}
 }
 
