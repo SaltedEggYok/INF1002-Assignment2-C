@@ -17,28 +17,73 @@
 #include <string.h>
 #include "chat1002.h"
 
- /*
-  * Get the response to a question.
-  *
-  * Input:
-  *   intent   - the question word
-  *   entity   - the entity
-  *   response - a buffer to receive the response
-  *   n        - the maximum number of characters to write to the response buffer
-  *
-  * Returns:
-  *   KB_OK, if a response was found for the intent and entity (the response is copied to the response buffer)
-  *   KB_NOTFOUND, if no response could be found
-  *   KB_INVALID, if 'intent' is not a recognised question word
-  */
-int knowledge_get(const char* intent, const char* entity, char* response, int n) {
+/*
+ * Get the response to a question.
+ *
+ * Input:
+ *   intent   - the question word
+ *   entity   - the entity
+ *   response - a buffer to receive the response
+ *   n        - the maximum number of characters to write to the response buffer
+ *
+ * Returns:
+ *   KB_OK, if a response was found for the intent and entity (the response is copied to the response buffer)
+ *   KB_NOTFOUND, if no response could be found
+ *   KB_INVALID, if 'intent' is not a recognised question word
+ */
+int knowledge_get(const char *intent, const char *entity, char *response, int n)
+{
 
-	/* to be implemented */
+	if (compare_token(intent, "what") == 0)
+	{
+		/*check each element in list*/
+		if (doesEntityExist(whatHead, entity) == 0)
+		{
+			// for(int i = 0; i <whatHead ;  ++i) {  
+			// if(std::string(whatHead[i].input) == input) { 
+			//     copy(whatHead[i].responses, result); 
+			//     return result;
+			// } 
+			return KB_NOTFOUND;
+		}
+		else
+		{
+			return KB_OK;
+		}
+	}
+	else if(comparetoken(intent, "where") == 0)
+	{
+
+		if (doesEntityExist(whereHead, entity) == 0)
+		{
+
+			return KB_NOTFOUND;
+		}
+		else
+		{
+			return KB_OK;
+		}
+	}
+	else if (comparetoken(intent, "who") == 0)
+	{
+		if (doesEntityExist(whoHead, entity) == 0)
+		{
+
+			return KB_NOTFOUND;
+		}
+		else
+		{
+			return KB_OK;
+		}
+	}
+	else
+	{
+		return KB_INVALID;
+	}
+	
 
 	return KB_NOTFOUND;
-
 }
-
 
 /*
  * Insert a new response to a question. If a response already exists for the
@@ -55,22 +100,21 @@ int knowledge_get(const char* intent, const char* entity, char* response, int n)
  *   KB_NOMEM, if there was a memory allocation failure
  *   KB_INVALID, if the intent is not a valid question word
  */
-int knowledge_put(const char* intent, const char* entity, const char* response) {
+int knowledge_put(const char *intent, const char *entity, const char *response)
+{
 
 	/* to be implemented */
-	//MIGHT BRING THE WHOLE NODECONSTRUCTOR CODE HERE
+	// MIGHT BRING THE WHOLE NODECONSTRUCTOR CODE HERE
 	if (nodeConstructor(intent, entity, response))
 	{
+		
 		return KB_OK;
 	}
 	else
 	{
 		return KB_INVALID;
 	}
-
-
 }
-
 
 /*
  * Read a knowledge base from a file.
@@ -80,9 +124,10 @@ int knowledge_put(const char* intent, const char* entity, const char* response) 
  *
  * Returns: the number of entity/response pairs successful read from the file
  */
-int knowledge_read(FILE* f) {
+int knowledge_read(FILE *f)
+{
 
-	//error handling
+	// error handling
 	if (NULL == f)
 	{
 		printf("File was NULL (knowledge.c)\n");
@@ -90,62 +135,61 @@ int knowledge_read(FILE* f) {
 	}
 
 	int pairCount = 0;
-	//token - used for strtok, string - used for each line in .ini file
-	char* token, * buffer = malloc(MAX_INPUT * sizeof(char));
+	// token - used for strtok, string - used for each line in .ini file
+	char *token, *buffer = malloc(MAX_INPUT * sizeof(char));
 	char intent[MAX_INTENT], entity[MAX_ENTITY], response[MAX_RESPONSE];
-	const char* delimiter = "=";
+	const char *delimiter = "=";
 	const char delim = '=';
 
-	//init intent, entity, response;
+	// init intent, entity, response;
 	strcpy(intent, "");
 	strcpy(entity, "");
 	strcpy(response, "");
 
-	//file reading loop
+	// file reading loop
 	while (1)
 	{
-		//endOfFile to be used at the bottom of the while loop to break out if needed
-		char* endOfFile = fgets(buffer, MAX_INPUT, f);
+		// endOfFile to be used at the bottom of the while loop to break out if needed
+		char *endOfFile = fgets(buffer, MAX_INPUT, f);
 
-		//if the line contains '=', it is an entity-response pair, call knowledge_put();
+		// if the line contains '=', it is an entity-response pair, call knowledge_put();
 		if (NULL != strchr(buffer, delim))
 		{
-			//if intent was not assigned anything, continue, if enters here means file was wrongly formatted
+			// if intent was not assigned anything, continue, if enters here means file was wrongly formatted
 			if ("" == intent)
 			{
 				continue;
 			}
 
-			//1st pass - entity, left of '='
+			// 1st pass - entity, left of '='
 			token = strtok(buffer, delimiter);
 			strcpy(entity, token);
 
-			//2nd pass - responsed, right of '='
+			// 2nd pass - responsed, right of '='
 			token = strtok(NULL, delimiter);
 			strcpy(response, token);
 
-			//adding to knowledge base
+			// adding to knowledge base
 			knowledge_put(intent, entity, response);
 			++pairCount;
 		}
-		else //if it does not contain '=', it is an intent line, set intent
+		else // if it does not contain '=', it is an intent line, set intent
 		{
 
-			if (strstr(buffer, "what")) //check if line is [WHAT], strcasestr returns a ptr, null if not found
+			if (strstr(buffer, "what")) // check if line is [WHAT], strcasestr returns a ptr, null if not found
 			{
 				strcpy(intent, "what");
 			}
-			else if (strstr(buffer, "who")) //check if line is [WHO]
+			else if (strstr(buffer, "who")) // check if line is [WHO]
 			{
 				strcpy(intent, "who");
-
 			}
-			else if (strstr(buffer, "where")) //check if line is [WHERE]
+			else if (strstr(buffer, "where")) // check if line is [WHERE]
 			{
 				strcpy(intent, "where");
 			}
-			//blank line / irrelevant line
-			//do nothing
+			// blank line / irrelevant line
+			// do nothing
 		}
 
 		if (NULL == endOfFile)
@@ -158,17 +202,16 @@ int knowledge_read(FILE* f) {
 	if (buffer)
 	{
 		free(buffer);
-		buffer = NULL; //for some reason nullptr doesn't work here
-
+		buffer = NULL; // for some reason nullptr doesn't work here
 	}
 	return pairCount;
 }
 
-
 /*
  * Reset the knowledge base, removing all know entitities from all intents.
  */
-void knowledge_reset() {
+void knowledge_reset()
+{
 
 	/* to be implemented */
 
@@ -204,9 +247,7 @@ void knowledge_reset() {
 			listIter = whereHead;
 		}
 	}
-
 }
-
 
 /*
  * Write the knowledge base to a file.
@@ -214,9 +255,8 @@ void knowledge_reset() {
  * Input:
  *   f - the file
  */
-void knowledge_write(FILE* f) {
+void knowledge_write(FILE *f)
+{
 
 	/* to be implemented */
-
 }
-
