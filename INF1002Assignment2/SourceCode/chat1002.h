@@ -9,6 +9,8 @@
 #define _CHAT1002_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 /* the maximum number of characters we expect in a line of input (including the terminating null)  */
 #define MAX_INPUT    256
@@ -62,8 +64,8 @@ typedef struct knowledgeNode {
 
 }knowledgeNode;
 
-//basic functions for knowledgeNOode
-knowledgeNode* nodeConstructor(char* intent, char* entity, char* response);
+//basic functions for knowledgeNode
+int nodeConstructor(char* intent, char* entity, char* response);
 knowledgeNode* getLastNode(knowledgeNode* head);
 knowledgeNode* doesEntityExist(knowledgeNode* head, char* entity);
 void printList(knowledgeNode* head);
