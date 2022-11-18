@@ -234,6 +234,7 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 	//int result = 100; //? delete
 	//int index = 0; //delete
 	char* entity = (char*)malloc(sizeof(char) * MAX_ENTITY);
+	char* question = NULL;
 	//entity = "";
 	strcpy(entity, "");
 	//knowledgeNode* nodePtr = doesEntityExist(inv, entity);
@@ -272,7 +273,7 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 		//concatenate the rest of the string into local entity var to be passed to check
 		strcat(entity, inv[i]);
 		//if not the last word, add a space between words, if reach the last break out of the loop
-		if (i < inc-1) {
+		if (i < inc - 1) {
 			strcat(entity, " ");
 		}
 		else {
@@ -284,51 +285,45 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 	//checking and getting pointer consisting of entity, likely change to knowledge_get !!!!
 	knowledgeNode* nodeptr = doesEntityExist(listIter, entity);
 
-	//if entity does not exist
-	if (nodeptr == NULL) {
-		//print message and return 
-		snprintf(response, n, "I don't know the answer to this question.");
-		//printf("I don't know the answer to this question. \n");
-		//return 0;
-	}
-	else { //if entity exists
-		snprintf(response, n, "%s", nodeptr->response);
-		free(entity);
-		//free(question);
-		return 0;
-	}
-
-	status = knowledge_get(inv[0], entity, response, MAX_RESPONSE);
-
-	////if number of words in the qn is less than 3, return invalid?
-	//if (inc < 3){
-	//	snprintf(response, n, "Invalid question!");
+	////if entity does not exist
+	//if (nodeptr == NULL) {
+	//	//print message and return 
+	//	snprintf(response, n, "I don't know the answer to this question.");
+	//	//printf("I don't know the answer to this question. \n");
+	//	//return 0;
+	//}
+	//else { //if entity exists
+	//	snprintf(response, n, "%s", nodeptr->response);
+	//	free(entity);
+	//	//free(question);
 	//	return 0;
 	//}
 
-	//delete?
-	//if (nodePtr == NULL)
-	//{
-	//	return KB_NOMEM;
-	//}
+	status = knowledge_get(inv[0], entity, response, MAX_RESPONSE);
 
-	// Create pointer to point to question. Must be not NULL.
-	char* question = (char*)malloc(sizeof(char) * MAX_INPUT);
-	if (question == NULL)
-	{
-		return KB_NOMEM;
-	}
-	strcpy(question, "I'm sorry I do not understand what is ");
-	strcat(question, entity);
-
-	/*
-	//// Check if intent and entity is inside knowledgeNode.
-	//int status = knowledge_get(intent, entity, response, n);
-	*/
 	// If entity is not found, ask user to input response for new entity.
-	if (status == KB_NOTFOUND) {
+	if (status == KB_OK) {
+		snprintf(response, n, response);
+		free(entity);
+		return KB_OK;
+	}
+	else if (status == KB_NOTFOUND) {
 		char user_input[MAX_INPUT];
-		strcat(question, "?");
+		// Create pointer to point to question. Must be not NULL.
+		question = (char*)malloc(sizeof(char) * MAX_INPUT);
+		if (question == NULL)
+		{
+			free(entity);
+			return KB_NOMEM;
+		}
+		//strcpy(question, "I'm sorry I do not understand %s is %s.", inv[0], entity);
+		snprintf(question, MAX_INPUT, "I'm sorry I do not understand %s is %s. Please enter the definition of %s.", inv[0], entity, entity);
+		//strcpy(question, "I'm sorry I do not understand ");
+		//strcat(question, inv[0]);
+		//strcat(question, entity);
+		//strcat(question, "I'm sorry I do not understand %s is %s.", inv[0], entity);
+
+
 		prompt_user(user_input, MAX_INPUT, question);
 
 		// Display :-( if user input is empty.
@@ -350,10 +345,7 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 		}
 	}
 	// Entity is found, display the respective response.
-	else if (status == KB_OK) {
-		snprintf(response, n, "%s", response);
-	}
-	else if (status == KB_NOMEM) {
+	else  if (status == KB_NOMEM) {
 		snprintf(response, n, "No memory currently!");
 	}
 	else {
@@ -361,7 +353,9 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 	}
 
 	free(entity);
-	free(question);
+	if (question) {
+		free(question);
+	}
 	return 0;
 
 }

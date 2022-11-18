@@ -14,16 +14,16 @@
 #include "chat1002.h"
 
  /* word delimiters */
-const char *delimiters = " ?\t\n";
+const char* delimiters = " ?\t\n";
 
 /*
  * Main loop.
  */
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 
 	char input[MAX_INPUT];      /* buffer for holding the user input */
 	int inc;                    /* the number of words in the user input */
-	char *inv[MAX_INPUT];       /* pointers to the beginning of each word of input */
+	char* inv[MAX_INPUT];       /* pointers to the beginning of each word of input */
 	char output[MAX_RESPONSE];  /* the chatbot's output */
 	int len;                    /* length of a word */
 	int done = 0;               /* set to 1 to end the main loop */
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 			/* read the line */
 			printf("%s: ", chatbot_username());
 			fgets(input, MAX_INPUT, stdin);
-			
+
 			/* split it into words */
 			inc = 0;
 			inv[inc] = strtok(input, delimiters); //used _CRT_SECURE_NO_WARNINGS (Debug > Debug Properties(Last option) > C/C++ > Preprocessor > Preprocessor definitions )
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 		//printList(whoHead);
 		//printList(whereHead);
 
-		
+
 		/* invoke the chatbot */
 		done = chatbot_main(inc, inv, output, MAX_RESPONSE);
 		printf("%s: %s\n", chatbot_botname(), output);
@@ -84,13 +84,13 @@ int main(int argc, char *argv[]) {
  * Utility function for comparing string case-insensitively.
  *
  * Input:
- *   token1 - the first token 
- *   token2 - the second token 
+ *   token1 - the first token
+ *   token2 - the second token
  *
  * Returns:
  *   as strcmp()
  */
-int compare_token(const char *token1, const char *token2) {
+int compare_token(const char* token1, const char* token2) {
 
 	int i = 0;
 	while (token1[i] != '\0' && token2[i] != '\0') {
@@ -120,7 +120,7 @@ int compare_token(const char *token1, const char *token2) {
  *   format - format string, as printf
  *   ...    - as printf
  */
-void prompt_user(char *buf, int n, const char *format, ...) {
+void prompt_user(char* buf, int n, const char* format, ...) {
 
 	/* print the prompt */
 	va_list args;
@@ -133,7 +133,7 @@ void prompt_user(char *buf, int n, const char *format, ...) {
 
 	/* get the response from the user */
 	fgets(buf, n, stdin);
-	char *nl = strchr(buf, '\n');
+	char* nl = strchr(buf, '\n');
 	if (nl != NULL)
 		*nl = '\0';
 }
