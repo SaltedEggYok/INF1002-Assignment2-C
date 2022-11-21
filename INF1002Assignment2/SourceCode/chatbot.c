@@ -440,29 +440,21 @@ int chatbot_do_save(int inc, char* inv[], char* response, int n) {
 	//char s[MAX_INPUT];
 	printf("Enter a filename:\n");
 	fgets(file_name, MAX_INPUT, stdin);
-	data = fopen(file_name, 'a');
-	if (data == NULL)
-		printf("I do not understand");
-	else
-		return 0;
 
 	//Check if file exist, if not, create it.
-	data = fopen(file_name, 'b');
-	if (data != NULL) {
-		//file exists and write into file 
-		data = fopen(file_name, "f");
-		knowledge_write(data);
-		fclose(data);
-		snprintf("Results saved from the knowledge base to [%s].\n", MAX_INPUT, file_name);
-		// close file when you're done
-		fclose(data);
-	}
-	else {
-		//file doesn't exists or cannot be opened
-		snprintf("File does not exist, can't open file [%s].\n", MAX_INPUT, file_name);
+	data = fopen(file_name, 'w');
+	if (data == NULL)	{
+		snprintf(response, n, "File does not exist, can't open file [%s].\n", file_name);
+		return KB_NOMEM;
 	}
 
-	return 0;
+	//file exists and write into file 
+	knowledge_write(data);
+	fclose(data);
+	snprintf(response, n, "Results saved from the knowledge base to [%s].\n", file_name);
+	// close file when you're done
+	fclose(data);
+	return KB_OK;
 
 }
 
