@@ -169,28 +169,31 @@ int chatbot_is_load(const char* intent) {
  */
 int chatbot_do_load(int inc, char* inv[], char* response, int n) {
 
-	/* to be implemented */
+	//declaring a var to hold the .ini file path
+	char* filePath = malloc(sizeof(char) * MAX_RESPONSE);
+	if (NULL == filePath) {
+		return KB_NOMEM;
+	}
+	strcpy(filePath, DATABASE_FOLDER_PATH);
+	//strcpy(filePath, "");
+	strcat(filePath, inv[1]);
 
-	FILE* f = fopen(inv[1], "r");
+	FILE* f = fopen(filePath, "r");
 	int lineCounter = 0;
 
 	//Checking if file is empty
-	if (f == NULL) {
-		snprintf(response, n, "%s not found. You sure correct file anot?");
+	lineCounter = knowledge_read(f); //read the num of lines in the file, null file is handled in knowledge_read
+	if (lineCounter == KB_NOMEM) { //check if there is enough memory
+		snprintf(response, n, "There is not enough memory available to load the database file.");
 	}
-	else {
-		lineCounter = knowledge_read(f); //read the num of lines in the file
-		if (lineCounter == KB_NOMEM) { //check if there is enough memory
-			snprintf(response, n, "Not enough memory you dumbass");
-		}
-		else if (lineCounter == -1) //check if file have invalid input
-		{
-			snprintf(response, n, "Invalid file you dumbass");
-		}
-		else { //all inputs in file are valid
-			snprintf(response, n, "Read %d response from %s already you dumbass", lineCounter, inv[1]);
-		}
+	else if (lineCounter == KB_NOTFOUND) { //check if file have invalid input	
+		snprintf(response, n, "%s not found. Are you sure that is the correct file?", inv[1]);
 	}
+	else { //all inputs in file are valid
+		snprintf(response, n, "Read %d responses from %s.", lineCounter, inv[1]);
+	}
+
+	free(filePath);
 	return 0;
 
 }
@@ -268,7 +271,6 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 		i = 1;
 	}
 	// looping throgh the word ptr array until its reaches the end
-	//for (; inv[i] != '\0' || inv[i] != NULL; ++i) { //if all good can delete
 	for (; ; ++i) {
 		//concatenate the rest of the string into local entity var to be passed to check
 		strcat(entity, inv[i]);
@@ -282,23 +284,7 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 	}
 	strcat(entity, "\0");
 
-	//checking and getting pointer consisting of entity, likely change to knowledge_get !!!!
-	knowledgeNode* nodeptr = doesEntityExist(listIter, entity);
-
-	////if entity does not exist
-	//if (nodeptr == NULL) {
-	//	//print message and return 
-	//	snprintf(response, n, "I don't know the answer to this question.");
-	//	//printf("I don't know the answer to this question. \n");
-	//	//return 0;
-	//}
-	//else { //if entity exists
-	//	snprintf(response, n, "%s", nodeptr->response);
-	//	free(entity);
-	//	//free(question);
-	//	return 0;
-	//}
-
+	//get response here
 	status = knowledge_get(inv[0], entity, response, MAX_RESPONSE);
 
 	// If entity is not found, ask user to input response for new entity.
@@ -311,36 +297,28 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 		char user_input[MAX_INPUT];
 		// Create pointer to point to question. Must be not NULL.
 		question = (char*)malloc(sizeof(char) * MAX_INPUT);
-		if (question == NULL)
+		if (NULL == question)
 		{
 			free(entity);
 			return KB_NOMEM;
 		}
-		//strcpy(question, "I'm sorry I do not understand %s is %s.", inv[0], entity);
+
+		//display prompt to user
 		snprintf(question, MAX_INPUT, "I'm sorry I do not understand %s is %s. Please enter the definition of %s.", inv[0], entity, entity);
-		//strcpy(question, "I'm sorry I do not understand ");
-		//strcat(question, inv[0]);
-		//strcat(question, entity);
-		//strcat(question, "I'm sorry I do not understand %s is %s.", inv[0], entity);
-
-
 		prompt_user(user_input, MAX_INPUT, question);
 
 		// Display :-( if user input is empty.
 		if (compare_token(user_input, "") == 0) {
 			snprintf(response, n, "Please enter a question with a response. \n");
-			//printf("Please enter a question with a response. \n");
 		}
 		else {
 			// Put new question into knowledge of chatbot.Î
 			status = knowledge_put(inv[0], entity, user_input);
 			if (status == KB_OK) {
 				snprintf(response, n, "Thank You. \n");
-				//printf(response, n, "Thank You. \n");
 			}
 			else {
 				snprintf(response, n, "Something went wrong! \n");
-				//printf(response, n, "Something went wrong! \n");
 			}
 		}
 	}
@@ -353,9 +331,7 @@ int chatbot_do_question(int inc, char* inv[], char* response, int n) {
 	}
 
 	free(entity);
-	if (question) {
-		free(question);
-	}
+	free(question);
 	return 0;
 
 }
@@ -388,8 +364,6 @@ int chatbot_is_reset(const char* intent) {
  *   0 (the chatbot always continues chatting after beign reset)
  */
 int chatbot_do_reset(int inc, char* inv[], char* response, int n) {
-
-	/* to be implemented */
 
 	knowledge_reset();
 
@@ -434,17 +408,29 @@ int chatbot_do_save(int inc, char* inv[], char* response, int n) {
   // stored in the output buffer, and be no longer than n characters long (you can use snprintf() to do this). The contents of this buffer will be printed by the main loop.
 
 	FILE* data;
-	char file_name[MAX_INPUT];
-
+	char* file_name = malloc(sizeof(char) * MAX_INPUT); //holds user input
+	if (NULL == file_name) {
+		return KB_NOMEM;
+	}
+	char* filePath = malloc(sizeof(char) * MAX_RESPONSE); //holds the full file path
+	if (NULL == filePath) {
+		free(file_name);
+		return KB_NOMEM;
+	}
 	//get user input to open file in c
-	//char s[MAX_INPUT];
 	printf("Enter a filename:\n");
 	fgets(file_name, MAX_INPUT, stdin);
+	file_name[strcspn(file_name, "\n")] = 0; // remove trailing \n
+
+	strcpy(filePath, DATABASE_FOLDER_PATH);
+	strcat(filePath, file_name);
 
 	//Check if file exist, if not, create it.
-	data = fopen(file_name, 'w');
-	if (data == NULL)	{
+	data = fopen(filePath, "w");
+	if (data == NULL) {
 		snprintf(response, n, "File does not exist, can't open file [%s].\n", file_name);
+		free(filePath);
+		free(file_name);
 		return KB_NOMEM;
 	}
 
@@ -454,6 +440,9 @@ int chatbot_do_save(int inc, char* inv[], char* response, int n) {
 	snprintf(response, n, "Results saved from the knowledge base to [%s].\n", file_name);
 	// close file when you're done
 	fclose(data);
+
+	free(filePath);
+	free(file_name);
 	return KB_OK;
 
 }

@@ -30,6 +30,9 @@
 #define KB_INVALID  -2
 #define KB_NOMEM    -3
 
+//file path to database folder
+#define DATABASE_FOLDER_PATH "../Database/"
+
 /* functions defined in main.c */
 int compare_token(const char* token1, const char* token2);
 void prompt_user(char* buf, int n, const char* format, ...);

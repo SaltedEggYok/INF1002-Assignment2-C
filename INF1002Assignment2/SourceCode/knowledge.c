@@ -115,7 +115,7 @@ int knowledge_read(FILE* f)
 	if (NULL == f)
 	{
 		printf("File was NULL (knowledge.c)\n");
-		return -1;
+		return KB_NOTFOUND;
 	}
 
 	int pairCount = 0;
@@ -164,15 +164,15 @@ int knowledge_read(FILE* f)
 		else // if it does not contain '=', it is an intent line, set intent
 		{
 
-			if (strstr(buffer, "what")) // check if line is [WHAT], strcasestr returns a ptr, null if not found
+			if (strstr(buffer, "what")) // check if line is [what], strstr returns a ptr to loc, null if not found
 			{
 				strcpy(intent, "what");
 			}
-			else if (strstr(buffer, "who")) // check if line is [WHO]
+			else if (strstr(buffer, "who")) // check if line is [who]
 			{
 				strcpy(intent, "who");
 			}
-			else if (strstr(buffer, "where")) // check if line is [WHERE]
+			else if (strstr(buffer, "where")) // check if line is [where]
 			{
 				strcpy(intent, "where");
 			}
@@ -180,6 +180,7 @@ int knowledge_read(FILE* f)
 			// do nothing
 		}
 
+		// breaks out at end of file
 		if (NULL == endOfFile)
 		{
 			break;
@@ -200,7 +201,7 @@ int knowledge_read(FILE* f)
  */
 void knowledge_reset()
 {
-
+	//if head of list exists, traverse down the list and free up memory 
 	if (whatHead)
 	{
 		listIter = whatHead;
@@ -233,6 +234,8 @@ void knowledge_reset()
 			listIter = whereHead;
 		}
 	}
+
+	return;
 }
 
 /*
@@ -243,53 +246,40 @@ void knowledge_reset()
  */
 void knowledge_write(FILE* f)
 {
-
-	/* to be implemented */
-	//Setting each linked-list
-	//knowledgeNode* whoPtr = whoHead,
-	//	* wherePtr = whereHead,
-	//	* whatPtr = whatHead;
-	//	//* temp = listIter;
-
-	//WHO
-	fprintf(f, "[who]\n");
-
-	listIter = whoHead;
-	while (listIter != NULL)
-	{
-		if (listIter->response[0] != '\0') {
-			fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
+	//writing onto file
+	for (int i = 0; i < 3; ++i) {
+		//writing title and setting ptr
+		switch (i) {
+		case 0:
+			//WHAT
+			fprintf(f, "[what]\n");
+			listIter = whatHead;
+			break;
+		case 1:
+			//WHERE
+			fprintf(f, "[where]\n");
+			listIter = whereHead;
+			break;
+		case 2:
+			//WHO
+			fprintf(f, "[who]\n");
+			listIter = whoHead;
+			break;
+		default:
+			//should never enter here
+			break;
 		}
-		listIter = listIter->next; //point to the next after each node
+
+		//while list is not null, traverse list and write data
+		while (listIter != NULL)
+		{
+			if (listIter->response[0] != '\0') {
+				fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
+			}
+			listIter = listIter->next; //point to the next after each node
+		}
+		fprintf(f, "\n");
 	}
 
-	fprintf(f, "\n");
-
-	//WHERE
-	fprintf(f, "[where]\n");
-
-	listIter = whereHead;
-	while (listIter != NULL)
-	{
-		if (listIter->response[0] != '\0') {
-			fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
-		}
-		listIter = listIter->next; //point to the next after each node
-	}
-
-	fprintf(f, "\n");
-
-	//WHAT
-	fprintf(f, "[what]\n");
-
-	listIter = whatHead;
-	while (listIter != NULL)
-	{
-		if (listIter->response[0] != '\0') {
-			fprintf(f, "%s=%s\n", listIter->entity, listIter->response); //writing each data onto the file
-		}
-		listIter = listIter->next; //point to the next after each node
-	}
-
-	fprintf(f, "\n");
+	return;
 }
